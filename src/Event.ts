@@ -19,6 +19,7 @@ export interface EventOptions {
   accountId: string;
   startTime: number;
   req: Request;
+  authorizer?: APIGatewayProxyCognitoAuthorizer;
   isBase64EncodedReq?: boolean;
   resourcePath?: string;
   stage?: string;
@@ -151,7 +152,7 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
       resourcePath,
       resourceId: generateRandomHex(6),
       // TODO: implement
-      authorizer: {
+      authorizer: this.options.authorizer || {
         claims: {}
       },
       // TODO: implement

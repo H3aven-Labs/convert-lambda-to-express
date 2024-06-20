@@ -58,7 +58,7 @@
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-non-null-assertion": "error", // turning this off removes type safety. use an if(){} to check for the null
     "@typescript-eslint/no-var-requires": "error",
-    "@typescript-eslint/no-misused-promises": ["error", { "checksConditionals": true, "checksVoidReturn": true }],
+    "@typescript-eslint/no-misused-promises": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {

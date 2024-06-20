@@ -1,12 +1,13 @@
 {
-  "name": "convert-lambda-to-express",
-  "version": "1.3.1",
+  "name": "@h3aven-labs/convert-lambda-to-express",
+  "version": "1.3.2",
   "description": "Wrapper to run lambda on express. Works great for running lambdas as an express server during development but is production ready. Developed to work in conjunction with matthewkeil/full-stack-pattern cdk construct.",
   "scripts": {
     "node": "node",
     "ts": "npm run node -- -r ts-node/register",
     "test": "jest",
-    "lint": "eslint --fix .",
+    "lint": "npx eslint --ext .ts",
+    "lint:fix": "npx eslint . --ext .ts --fix",
     "build": "rm -rf dist && tsc --project tsconfig.build.json",
     "postversion": "git push --tags"
   },
@@ -54,12 +55,12 @@
       "email": "me@matthewkeil.com"
     }
   ],
-  "repository": {
+ "repository": {
     "type": "git",
-    "url": "https://github.com/matthewkeil/convert-lambda-to-express.git"
+    "url": "git+https://github.com/H3aven-Labs/convert-lambda-to-express.git"
   },
   "bugs": {
-    "url": "https://github.com/matthewkeil/convert-lambda-to-express/issues"
+    "url": "https://github.com/H3aven-Labs/convert-lambda-to-express/issues"
   },
   "keywords": [
     "lambda",

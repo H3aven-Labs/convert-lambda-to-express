@@ -9,7 +9,7 @@ import { runHandler } from './runHandler';
 
 export interface WrapperOptions
   extends Omit<ContextOptions, 'startTime' | 'credentials'>,
-    Pick<EventOptions, 'isBase64EncodedReq' | 'resourcePath' | 'stage' | 'stageVariables'>,
+    Pick<EventOptions, 'isBase64EncodedReq' | 'resourcePath' | 'stage' | 'stageVariables' | 'authorizer'>,
     ConvertResponseOptions {
   credentialsFilename?: string;
   profile?: string;
