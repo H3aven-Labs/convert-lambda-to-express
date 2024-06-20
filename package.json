@@ -6,7 +6,8 @@
     "node": "node",
     "ts": "npm run node -- -r ts-node/register",
     "test": "jest",
-    "lint": "eslint --fix .",
+    "lint": "npx eslint --ext .ts",
+    "lint:fix": "npx eslint . --ext .ts --fix",
     "build": "rm -rf dist && tsc --project tsconfig.build.json",
     "postversion": "git push --tags"
   },
