@@ -154,7 +154,6 @@ describe('convertResponse()', () => {
       expect(res.header).toHaveBeenNthCalledWith(1, 'content-type', defaultContentType);
       expect(logger.info).toBeCalledTimes(1);
       expect(logger.info).toHaveBeenNthCalledWith(1, 'End - Result:');
-      expect(logger.info).toHaveBeenNthCalledWith(2, defaultResponse.body);
       expect(res.send).toBeCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith(defaultResponse.body);
       expect(res.status).toBeCalledTimes(1);
