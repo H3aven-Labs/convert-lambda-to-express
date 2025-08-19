@@ -29,7 +29,7 @@
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.3",
-    "@types/node": "^15.12.4",
+    "@types/node": "^20.3.2",
     "@types/nodemon": "^1.19.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
