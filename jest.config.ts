@@ -1,6 +1,5 @@
-import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
-const config: InitialOptionsTsJest = {
+const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   rootDir: __dirname,
