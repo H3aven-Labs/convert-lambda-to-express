@@ -28,11 +28,6 @@ jobs:
           node-version: 18.18.2
           # cache: "yarn"
 
-      - uses: actions/download-artifact@master
-        with:
-          name: build artifacts
-          path: dist
-
       - name: Set variables
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.H3_NPM_TOKEN }}" >> .npmrc
