@@ -1,5 +1,5 @@
 ---
-name: On Master
+name: Publish New Version
 
 on:
   workflow_dispatch:
