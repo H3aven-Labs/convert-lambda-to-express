@@ -1,0 +1,10 @@
+nodeLinker: node-modules
+
+npmRegistries:
+  "https://npm.pkg.github.com":
+    npmAuthToken: your-token-here
+
+npmScopes:
+  h3aven-labs:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.pkg.github.com"

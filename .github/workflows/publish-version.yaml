@@ -41,13 +41,21 @@ jobs:
     needs: buildLintTest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Install node.js
-        uses: actions/setup-node@v3
+      - name: Set RUN_URL Environment Variable
+        run: |
+          echo "RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Enable Corepack and prepare correct Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+
+      - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
-          cache: 'yarn'
+          node-version: 18.18.2
+          cache: "yarn"
 
       - uses: actions/download-artifact@master
         with:
@@ -59,10 +67,30 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.H3_NPM_TOKEN }}" >> .npmrc
           echo "@h3aven-labs:registry=https://npm.pkg.github.com/" >> .npmrc
           echo "PACKAGE_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
+  
+      - name: Create .yarnrc.yml
+        run: |
+          cat <<EOF > .yarnrc.yml
+          nodeLinker: node-modules
+
+          npmRegistries:
+            "https://npm.pkg.github.com":
+              npmAuthToken: ${{ secrets.H3_NPM_TOKEN }}
+
+          npmScopes:
+            h3aven-labs:
+              npmAlwaysAuth: true
+              npmRegistryServer: "https://npm.pkg.github.com"
+          EOF
+
+      - name: Yarn Install
+        run: |
+          yarn set version 4.9.2
+          yarn install
 
       - name: Deploy
         run: |
-          yarn install
+          yarn build
           npm publish
           git tag v${{ env.PACKAGE_VERSION }} -f
           git push --tags -f
