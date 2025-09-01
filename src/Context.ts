@@ -1,8 +1,8 @@
 import os from 'os';
 import { resolve } from 'path';
-import { SharedIniFileCredentials } from 'aws-sdk';
 import { Context as IContext, CognitoIdentity, ClientContext } from 'aws-lambda';
 import { generateRandomHex, TimeoutError } from './utils';
+import { AwsCredentialIdentity } from '@smithy/types';
 
 type Resolve = (response: unknown) => void;
 type Reject = (err: Error) => void;
@@ -13,7 +13,7 @@ type Reject = (err: Error) => void;
  */
 export interface ContextOptions {
   startTime: number;
-  credentials?: SharedIniFileCredentials;
+  credentials?: AwsCredentialIdentity;
   functionName?: string;
   functionVersion?: string;
   memorySize?: number;

@@ -2,11 +2,12 @@ import jwt from "jsonwebtoken";
 import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
 import { Logger } from 'winston';
 import { Handler, NextFunction, Request, Response } from 'express';
-import { SharedIniFileCredentials, Credentials } from 'aws-sdk';
+import { fromEnv, fromIni } from '@aws-sdk/credential-providers';
 import { Context, ContextOptions } from './Context';
 import { Event, EventOptions } from './Event';
 import { convertResponseFactory, ConvertResponseOptions } from './convertResponse';
 import { runHandler } from './runHandler';
+import { AwsCredentialIdentity } from "@smithy/types";
 
 export interface WrapperOptions
   extends Omit<ContextOptions, 'startTime' | 'credentials'>,
@@ -18,22 +19,20 @@ export interface WrapperOptions
   jwtSecret?: string;
 }
 
-// Função que simula a geração de uma política de autorização (similar ao IAM policy document)
 function generatePolicy(principalId: string, effect: string, resource: string) {
   return {
-    principalId, // Identificador do usuário (ex.: ID do usuário ou token)
+    principalId,
     policyDocument: {
       Version: '2012-10-17',
       Statement: [
         {
           Action: 'execute-api:Invoke',
-          Effect: effect, // 'Allow' ou 'Deny'
-          Resource: resource, // Recurso da API (pode ser um ARN ou um identificador genérico)
+          Effect: effect,
+          Resource: resource,
         },
       ],
     },
     context: {
-      // Informações adicionais para passar ao handler (opcional)
       userId: principalId,
     },
   };
@@ -42,16 +41,11 @@ function generatePolicy(principalId: string, effect: string, resource: string) {
 function authorizerMiddleware(req: Request<any>, res: Response, next: NextFunction, jwtSecret: string) {
   const authHeader = req.headers["authorization"] || req.headers["Authorization"];
 
-  // Verifica se o cabeçalho Authorization existe
   if (!authHeader) {
     throw new Error( "Missing Authorization header");
   }
-
   try {
-    // Valida o JWT
     const decodedToken: any = jwt.verify(authHeader as string, jwtSecret);
-
-    // Simula a geração de uma política de autorização
     
     if (
       !decodedToken ||
@@ -65,45 +59,50 @@ function authorizerMiddleware(req: Request<any>, res: Response, next: NextFuncti
     }
     
     const policy = generatePolicy(decodedToken['sub'], "Allow", req.path);
-
-    // Adiciona informações do usuário ao objeto req (similar ao context do Authorizer)
+    
     (req as any)['user'] = {
       userId: decodedToken['sub'],
       context: policy.context,
-    };
-    // Prossegue para a próxima rota
+    };    
     next();
-  } catch (error) {
-    // Caso o token seja inválido, retorna erro 403 (similar a Deny)
+  } catch (error) {    
     console.error("Token validation error:", error);
     throw new Error( "Invalid or expired token");
   }
 }
 
 
-export function getCredentials(filename?: string, profile?: string) {
-  if (filename) {
-    const credentials = new SharedIniFileCredentials({ filename, profile });
-    if (!!credentials.accessKeyId && !!credentials.secretAccessKey) {
-      return credentials;
+export async function getCredentials(filename?: string, profile?: string): Promise<AwsCredentialIdentity | undefined> {
+  try {
+    if (filename) {
+      const fileCredentialsProvider = fromIni({
+        profile,
+        filepath: filename
+      });
+      const fileCredentials = await fileCredentialsProvider();
+      
+      if (!!fileCredentials.accessKeyId && !!fileCredentials.secretAccessKey) {
+        return fileCredentials;
+      }
     }
-  }
 
-  if (process.env.AWS_ACCESS_KEY_ID?.length && process.env.AWS_SECRET_ACCESS_KEY?.length) {
-    return new Credentials({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      sessionToken: process.env.AWS_SESSION_TOKEN
-    });
+    if (process.env.AWS_ACCESS_KEY_ID?.length && process.env.AWS_SECRET_ACCESS_KEY?.length) {
+      const envCredentialsProvider = fromEnv();
+      const envCredentials = await envCredentialsProvider();
+
+      return envCredentials;    
+    }
+  } catch (e) {
+    return undefined;
   }
 }
 
-export function wrapLambdaWithAuthorizer(
+export async function wrapLambdaWithAuthorizer(
   handler: APIGatewayProxyWithCognitoAuthorizerHandler,
   options: WrapperOptions = {}
-): Handler {
+): Promise<Handler> {
   const logger = options.logger ?? console;
-  const credentials = getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
+  const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
 
   return async (req, res, next) => {
     try {

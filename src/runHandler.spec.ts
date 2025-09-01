@@ -563,6 +563,7 @@ describe('runHandler()', () => {
     };
 
     const { event, context, logger } = buildObjects();
+
     runHandler({
       event,
       context,
