@@ -97,14 +97,15 @@ export async function getCredentials(filename?: string, profile?: string): Promi
   }
 }
 
-export async function wrapLambdaWithAuthorizer(
+export function wrapLambdaWithAuthorizer(
   handler: APIGatewayProxyWithCognitoAuthorizerHandler,
   options: WrapperOptions = {}
-): Promise<Handler> {
+): Handler {
   const logger = options.logger ?? console;
-  const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
 
   return async (req, res, next) => {
+    const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
+
     try {
       if(!options.jwtSecret) {
         return res.status(401).json({ error: "JWT secret is required" });
