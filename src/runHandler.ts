@@ -34,7 +34,7 @@ export async function runHandler({
 }): Promise<void> {
   try {
     const response = await new Promise<unknown | undefined>((_resolve, _reject) => {
-      // logger.info(`START RequestId: ${context.awsRequestId}`);
+      logger.info(`START RequestId: ${context.awsRequestId}`);
 
       // only allow one resolution. which ever is first (callback, context.done,
       // promise) wins and the other(s) is ignored
@@ -57,7 +57,6 @@ export async function runHandler({
         logger.error('multiple resolutions. ignoring error:');
         logger.error(inspect(err, false, Infinity));
       }
-
       // handle case #1 from comment above. set resolve/reject on context object
       // and Context class actuates them context.done/succeed/fail are called
       context._resolve = resolve;

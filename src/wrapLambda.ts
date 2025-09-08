@@ -1,11 +1,12 @@
 import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
 import { Logger } from 'winston';
 import { Handler } from 'express';
-import { SharedIniFileCredentials, Credentials } from 'aws-sdk';
 import { Context, ContextOptions } from './Context';
 import { Event, EventOptions } from './Event';
 import { convertResponseFactory, ConvertResponseOptions } from './convertResponse';
 import { runHandler } from './runHandler';
+import { fromEnv, fromIni } from '@aws-sdk/credential-providers';
+import { AwsCredentialIdentity } from '@smithy/types';
 
 export interface WrapperOptions
   extends Omit<ContextOptions, 'startTime' | 'credentials'>,
@@ -16,20 +17,29 @@ export interface WrapperOptions
   logger?: Logger;
 }
 
-export function getCredentials(filename?: string, profile?: string) {
-  if (filename) {
-    const credentials = new SharedIniFileCredentials({ filename, profile });
-    if (!!credentials.accessKeyId && !!credentials.secretAccessKey) {
-      return credentials;
-    }
-  }
+export async function getCredentials(filename?: string, profile?: string): Promise<AwsCredentialIdentity | undefined> {
+  try {
+    if (filename) {
+      const fileCredentialsProvider = fromIni({
+        profile,
+        filepath: filename
+      });
 
-  if (process.env.AWS_ACCESS_KEY_ID?.length && process.env.AWS_SECRET_ACCESS_KEY?.length) {
-    return new Credentials({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      sessionToken: process.env.AWS_SESSION_TOKEN
-    });
+      const fileCredentials = await fileCredentialsProvider();
+
+      if (!!fileCredentials.accessKeyId && !!fileCredentials.secretAccessKey) {
+        return fileCredentials;
+      }
+    }
+
+    if (process.env.AWS_ACCESS_KEY_ID?.length && process.env.AWS_SECRET_ACCESS_KEY?.length) {
+      const envCredentialsProvider = fromEnv();
+      const envCredentials = await envCredentialsProvider();
+
+      return envCredentials;
+    }
+  } catch (e) {
+    return undefined;
   }
 }
 
@@ -38,10 +48,11 @@ export function wrapLambda(
   options: WrapperOptions = {}
 ): Handler {
   const logger = options.logger ?? console;
-  const credentials = getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
-
+  
   return async (req, res, next) => {
     try {
+      const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
+
       const startTime = Date.now();
       const context = new Context({
         ...options,
