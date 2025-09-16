@@ -222,8 +222,7 @@ export class Context implements IContext {
     env.LAMBDA_RUNTIME_DIR = process.execPath;
     env.NODE_PATH = this.options.nodeModulesPath
       ? this.options.nodeModulesPath
-      : resolve(require.resolve('express'), '..', '..');
-
+      : resolve(pwd, 'node_modules');
     return env;
   }
 }

@@ -17,25 +17,10 @@ module.exports = {
   node: {
     __dirname: true,
   },
+  target: ["node"],
   cache: false,
   resolve: {
-    extensions: [".ts", ".js", ".json"],
-    fallback: {
-      "assert": require.resolve("assert/"),
-      "buffer": require.resolve("buffer/"),
-      "crypto": require.resolve("crypto-browserify"),
-      "fs": require.resolve("browserify-fs"),
-      "http": require.resolve("stream-http"),
-      "net": require.resolve("net-browserify"),
-      "querystring": require.resolve("querystring-es3"),
-      "os": require.resolve("os-browserify/browser"),      
-      "stream": require.resolve("stream-browserify"),      
-      "path": require.resolve("path-browserify"),
-      "util": require.resolve("util/"),
-      "url": require.resolve("url/"),
-      "vm": require.resolve("vm-browserify"),
-      "zlib": require.resolve("browserify-zlib"),
-    },
+    extensions: [".ts", ".js", ".json"],    
   },
   optimization: {
     minimize: true,
