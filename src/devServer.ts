@@ -3,7 +3,7 @@
 import { resolve } from 'path';
 import { createServer } from 'http';
 import { watch } from 'chokidar';
-import type { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
+import type { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';

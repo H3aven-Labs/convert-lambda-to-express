@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
+import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { Logger } from 'winston';
 import { Handler, NextFunction, Request, Response } from 'express';
 import { fromEnv, fromIni } from '@aws-sdk/credential-providers';

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResult } from './aws-lambda';
 import { coerceBody, convertResponseFactory, ConvertResponseOptions, setResponseHeaders } from './convertResponse';
 
 class MockResponse {

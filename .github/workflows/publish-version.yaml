@@ -59,7 +59,6 @@ jobs:
 
       - name: Deploy
         run: |
-          yarn build
-          npm publish
+          yarn clean-publish
           git tag v${{ env.PACKAGE_VERSION }} -f
           git push --tags -f

@@ -1,4 +1,5 @@
 import { Request } from 'express';
+
 import {
   APIGatewayEventRequestContextWithAuthorizer,
   APIGatewayProxyCognitoAuthorizer,
@@ -9,7 +10,8 @@ import {
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyEventStageVariables,
   APIGatewayProxyWithCognitoAuthorizerEvent
-} from 'aws-lambda';
+} from './aws-lambda';
+
 import { generateRandomHex } from './utils';
 
 const DEFAULT_RESOURCE_PATH = '/{proxy+}';
