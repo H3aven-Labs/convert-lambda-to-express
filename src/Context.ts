@@ -1,6 +1,6 @@
 import os from 'os';
 import { resolve } from 'path';
-import { Context as IContext, CognitoIdentity, ClientContext } from 'aws-lambda';
+import { Context as IContext, CognitoIdentity, ClientContext } from './aws-lambda';
 import { generateRandomHex, TimeoutError } from './utils';
 import { AwsCredentialIdentity } from '@smithy/types';
 

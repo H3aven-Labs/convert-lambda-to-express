@@ -1,5 +1,5 @@
 import { inspect } from 'util';
-import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
+import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { Event } from './Event';
 import { Context } from './Context';
 import { Logger } from 'winston';

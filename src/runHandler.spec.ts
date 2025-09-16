@@ -1,7 +1,7 @@
 /* eslint-disable require-await */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
-import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
+import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { Context } from './Context';
 import { Event } from './Event';
 import { runHandler } from './runHandler';

@@ -1,4 +1,4 @@
-import { APIGatewayProxyWithCognitoAuthorizerHandler } from 'aws-lambda';
+import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { Logger } from 'winston';
 import { Handler } from 'express';
 import { Context, ContextOptions } from './Context';
