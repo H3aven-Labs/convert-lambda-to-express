@@ -13,11 +13,11 @@ describe('devServer', () => {
     beforeEach(() => {
       watchPaths.length = 0;
     });
-    
+
     afterEach(() => {
       watchPaths.length = 0;
     });
-    
+
     it('should watch multiple paths', () => {
       const path1 = resolve(__dirname, '..', 'test');
       const path2 = resolve(__dirname, '..', 'src');

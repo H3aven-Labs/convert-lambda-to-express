@@ -48,7 +48,7 @@ export function wrapLambda(
   options: WrapperOptions = {}
 ): Handler {
   const logger = options.logger ?? console;
-  
+
   return async (req, res, next) => {
     try {
       const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);

@@ -14,7 +14,7 @@ describe('getCredentials', () => {
 
   it('should load profile credentials from file', async () => {
     const credentials = await getCredentials(testCredentialsFile, 'test');
-    
+
     expect(credentials?.accessKeyId).toEqual('ABCDEFGHIJKLMNOPQRST');
     expect(credentials?.secretAccessKey).toEqual('foobarbaz2');
     expect(credentials?.sessionToken).toEqual('foobarbazfoobarbazfoobarbaz2');
