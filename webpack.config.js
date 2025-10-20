@@ -1,34 +1,36 @@
-const path = require("path");
-const TerserPlugin = require("terser-webpack-plugin");
+const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 const webpack = require('webpack');
 
 const optionalPlugins = [];
 
-if (process.platform !== "darwin") {
+if (process.platform !== 'darwin') {
   optionalPlugins.push(
-    new webpack.IgnorePlugin({ 
-      resourceRegExp: /^fsevents|async\_hooks$/ 
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^fsevents|async\_hooks$/
     })
   );
 }
 module.exports = {
-  mode: "production",
-  entry: "./src/index.ts",
+  mode: 'production',
+  entry: './src/index.ts',
   node: {
-    __dirname: true,
+    __dirname: true
   },
-  target: ["node"],
+  target: ['node'],
   cache: false,
   resolve: {
-    extensions: [".ts", ".js", ".json"],    
+    extensions: ['.ts', '.js', '.json']
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({
-      terserOptions: {
-        compress: { drop_console: true },
-      },
-    })],
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          compress: { drop_console: true }
+        }
+      })
+    ]
   },
   module: {
     rules: [
@@ -36,27 +38,24 @@ module.exports = {
         test: /\.ts$/,
         use: [
           {
-            loader: 'ts-loader'            
-          },
-        ],
-      },
-    ],
+            loader: 'ts-loader'
+          }
+        ]
+      }
+    ]
   },
   plugins: [
     ...optionalPlugins,
-    new webpack.ContextReplacementPlugin(
-      /\/express/,
-      (data) => {
-        delete data.dependencies[0].critical;
-        return data;
-      },
-    ),
+    new webpack.ContextReplacementPlugin(/\/express/, data => {
+      delete data.dependencies[0].critical;
+      return data;
+    })
   ],
   output: {
-    globalObject: "this",
-    libraryTarget: "commonjs2",
-    path: path.join(__dirname, "dist"),
-    filename: "index.js",
+    globalObject: 'this',
+    libraryTarget: 'commonjs2',
+    path: path.join(__dirname, 'dist'),
+    filename: 'index.js',
     clean: true
-  },
+  }
 };
