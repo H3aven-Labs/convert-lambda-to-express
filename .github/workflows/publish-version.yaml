@@ -1,21 +1,26 @@
----
-name: Publish New Version
+name: Publish new version
 
 on:
-  workflow_dispatch:
-
   push:
-    branches: ["master"]
+    branches:
+      - "main"
+
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Debug mode"
+        required: false
+        default: false
 
 jobs:
-  publishVersion:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set RUN_URL Environment Variable
         run: |
@@ -29,12 +34,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 22.19.0
-          # cache: "yarn"
-
-      - name: Enable Corepack and prepare correct Yarn version
-        run: |
-          corepack enable
-          corepack prepare yarn@4.12.0 --activate
+          # cache: 'yarn'
 
       - name: Set variables
         run: |
@@ -57,13 +57,37 @@ jobs:
               npmRegistryServer: "https://npm.pkg.github.com"
           EOF
 
-      - name: Install dependencies
-        run: |
-          yarn set version 4.12.0
-          yarn install --frozen-lockfile
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
-      - name: Deploy
+      - name: Publish
         run: |
-          yarn clean-publish
+          yarn
+          yarn build
+          npm publish
+
+      - name: Generate new Tag
+        run: |
           git tag v${{ env.PACKAGE_VERSION }} -f
           git push --tags -f
+
+      - name: Notify Slack on success
+        uses: slackapi/slack-github-action@v2.1.1
+        if: ${{ success() }}
+        with:
+          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            status: "success"
+            text: "✅ h3-tools v${{ env.PACKAGE_VERSION }} published!\nAction Link: ${{ env.RUN_URL }}"
+
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.1.1
+        if: ${{ failure() }}
+        with:
+          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            status: "failure"
+            text: "❌ h3-tools v${{ env.PACKAGE_VERSION }} publish failed!\nAction Link: ${{ env.RUN_URL }}"
