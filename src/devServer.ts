@@ -37,11 +37,11 @@ export interface DevServerConfig {
   environment?: HandlerEnvironment;
 }
 
-if (!globalThis.CLTE_HANDLER_DEFINITIONS) {
-  globalThis.CLTE_HANDLER_DEFINITIONS = [];
+if (!(globalThis as any).CLTE_HANDLER_DEFINITIONS) {
+  (globalThis as any).CLTE_HANDLER_DEFINITIONS = [];
 }
-export const handlerDefinitions: HandlerConfig[] =
-  globalThis.CLTE_HANDLER_DEFINITIONS;
+export const handlerDefinitions: HandlerConfig[] = (globalThis as any)
+  .CLTE_HANDLER_DEFINITIONS;
 
 export const watchPaths: string[] = [];
 export function watchCodePath(path: string) {
