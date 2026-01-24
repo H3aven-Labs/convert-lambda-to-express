@@ -19,7 +19,7 @@ describe('Context', () => {
       await new Promise((_, reject) => {
         const context = new Context({
           startTime: Date.now(),
-          timeoutInSeconds: 1
+          timeoutInSeconds: 1,
         });
         context._reject = reject;
       });
@@ -35,7 +35,7 @@ describe('Context', () => {
 
     const context = new Context({
       startTime: Date.now(),
-      timeoutInSeconds: 1
+      timeoutInSeconds: 1,
     });
 
     setTimeout(() => {

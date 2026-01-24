@@ -1,6 +1,5 @@
-/* eslint-disable require-await */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
+
 import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { Context } from './Context';
 import { Event } from './Event';
@@ -14,13 +13,13 @@ describe('runHandler()', () => {
       startTime,
       awsRequestId: context.awsRequestId,
       accountId: context._accountId,
-      req: {} as any
+      req: {} as any,
     });
     const logger = {
       log: jest.fn() as any,
       warn: jest.fn() as any,
       error: jest.fn() as any,
-      info: jest.fn() as any
+      info: jest.fn() as any,
     } as Console;
 
     return { event, context, logger };
@@ -41,7 +40,7 @@ describe('runHandler()', () => {
         callback: (_, result) => {
           expect(result).toEqual('it worked');
           done();
-        }
+        },
       });
     });
 
@@ -59,10 +58,10 @@ describe('runHandler()', () => {
         callback: (_, result) => {
           expect(result).toEqual({
             statusCode: 200,
-            body: 'it worked'
+            body: 'it worked',
           });
           done();
-        }
+        },
       });
     });
 
@@ -80,10 +79,10 @@ describe('runHandler()', () => {
         callback: (_, result) => {
           expect(result).toEqual({
             statusCode: 200,
-            body: 'it worked'
+            body: 'it worked',
           });
           done();
-        }
+        },
       });
     });
   });
@@ -104,7 +103,7 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
 
@@ -123,7 +122,7 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
 
@@ -142,7 +141,7 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
 
@@ -161,7 +160,7 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
   });
@@ -182,7 +181,7 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
 
@@ -201,14 +200,13 @@ describe('runHandler()', () => {
           expect(err).toBeInstanceOf(Error);
           expect(err?.message).toEqual('it errored');
           done();
-        }
+        },
       });
     });
   });
 
   it('should handler throwing of an object that is not an Error', done => {
     const handler: APIGatewayProxyWithCognitoAuthorizerHandler = () => {
-      // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw 'this is not an error!!';
     };
 
@@ -223,7 +221,7 @@ describe('runHandler()', () => {
         expect(err).toBeInstanceOf(Error);
         expect(err?.message).toEqual('something other than an error was thrown from the handler');
         done();
-      }
+      },
     });
   });
 
@@ -247,7 +245,7 @@ describe('runHandler()', () => {
           expect(spyFinalize).toHaveBeenCalled();
           spyTimeout.mockRestore();
           spyFinalize.mockRestore();
-        }
+        },
       });
     });
 
@@ -270,7 +268,7 @@ describe('runHandler()', () => {
           expect(spyFinalize).toHaveBeenCalled();
           spyTimeout.mockRestore();
           spyFinalize.mockRestore();
-        }
+        },
       });
     });
 
@@ -290,7 +288,7 @@ describe('runHandler()', () => {
         callback: () => {
           expect(context._clearTimeout).toHaveBeenCalled();
           spy.mockRestore();
-        }
+        },
       });
     });
   });
@@ -315,10 +313,16 @@ describe('runHandler()', () => {
           callback: (_, result) => {
             expect(result).toEqual(validResponse);
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring results:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidResponse, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring results:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidResponse, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
       it('context and async', done => {
@@ -339,10 +343,16 @@ describe('runHandler()', () => {
           callback: (_, result) => {
             expect(result).toEqual(validResponse);
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring results:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidResponse, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring results:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidResponse, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
       it('callback and async', done => {
@@ -363,10 +373,16 @@ describe('runHandler()', () => {
           callback: (_, result) => {
             expect(result).toEqual(validResponse);
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring results:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidResponse, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring results:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidResponse, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
     });
@@ -389,10 +405,16 @@ describe('runHandler()', () => {
             expect(error).toBeInstanceOf(Error);
             expect(error?.message).toEqual('it errored');
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring error:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidError, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring error:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidError, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
       it('context and async', done => {
@@ -427,7 +449,7 @@ describe('runHandler()', () => {
             //   util.inspect(invalidError, false, Infinity)
             // );
             done();
-          }
+          },
         });
       });
       it('callback and async', done => {
@@ -462,7 +484,7 @@ describe('runHandler()', () => {
             //   util.inspect(invalidError, false, Infinity)
             // );
             done();
-          }
+          },
         });
       });
     });
@@ -486,10 +508,16 @@ describe('runHandler()', () => {
           callback: (_, result) => {
             expect(result).toEqual(validResponse);
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring error:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidResponse, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring error:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidResponse, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
       it('context and async', done => {
@@ -512,10 +540,16 @@ describe('runHandler()', () => {
             expect(error).toBeInstanceOf(Error);
             expect(error?.message).toEqual('it errored also');
             expect(logger.error).toBeCalledTimes(2);
-            expect(logger.error).toHaveBeenNthCalledWith(1, 'multiple resolutions. ignoring results:');
-            expect(logger.error).toHaveBeenNthCalledWith(2, util.inspect(invalidResponse, false, Infinity));
+            expect(logger.error).toHaveBeenNthCalledWith(
+              1,
+              'multiple resolutions. ignoring results:',
+            );
+            expect(logger.error).toHaveBeenNthCalledWith(
+              2,
+              util.inspect(invalidResponse, false, Infinity),
+            );
             done();
-          }
+          },
         });
       });
       it('callback and async', done => {
@@ -551,7 +585,7 @@ describe('runHandler()', () => {
             //   util.inspect(validResponse, false, Infinity)
             // );
             done();
-          }
+          },
         });
       });
     });
@@ -572,7 +606,7 @@ describe('runHandler()', () => {
       callback: () => {
         expect(logger.info).toHaveBeenCalledWith(`START RequestId: ${context.awsRequestId}`);
         done();
-      }
+      },
     });
   });
 });

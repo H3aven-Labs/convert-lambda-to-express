@@ -1,32 +1,32 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "target": "ES2018",
-    "lib": ["ESNext"],
-    "module": "commonjs",
+    "baseUrl": "./src/",
+    "target": "es6",
+    "allowJs": true,
     "moduleResolution": "node",
-    "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": false,
-    "checkJs": false,
-    "declaration": true,
-    "alwaysStrict": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "strictBindCallApply": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    // "noUnusedParameters": true,
-    // "noUnusedLocals": true,
-    "typeRoots": ["node_modules/@types"],
-    "types": ["node", "jest"]
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "moduleDetection": "force",
+    "lib": ["esnext", "dom"],
+    "types": ["node", "jest"],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "paths": {
+        "@/*": ["./*"]
+      }
+    },
+    "require": ["tsconfig-paths/register"]
   },
   "files": ["src/index.d.ts"]
 }

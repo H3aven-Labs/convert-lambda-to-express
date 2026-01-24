@@ -1,8 +1,8 @@
 import { inspect } from 'util';
+
 import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
-import { Event } from './Event';
 import { Context } from './Context';
-import { Logger } from 'winston';
+import { Event } from './Event';
 
 /**
  * @description handler function can return results via three methods. need to
@@ -24,65 +24,70 @@ export async function runHandler({
   context,
   logger,
   handler,
-  callback
+  callback,
 }: {
   event: Event;
   context: Context;
-  logger: Logger | Console;
+  logger: Console;
   handler: APIGatewayProxyWithCognitoAuthorizerHandler;
   callback: (err?: Error, result?: unknown) => void;
 }): Promise<void> {
   try {
-    const response = await new Promise<unknown | undefined>((_resolve, _reject) => {
-      logger.info(`START RequestId: ${context.awsRequestId}`);
+    const response = await new Promise<unknown | undefined>(
+      (_resolve, _reject) => {
+        logger.info(`START RequestId: ${context.awsRequestId}`);
 
-      // only allow one resolution. which ever is first (callback, context.done,
-      // promise) wins and the other(s) is ignored
-      let resolved = false;
+        // only allow one resolution. which ever is first (callback, context.done,
+        // promise) wins and the other(s) is ignored
+        let resolved = false;
 
-      function resolve(results?: unknown) {
-        if (!resolved) {
-          resolved = true;
-          return _resolve(results);
+        function resolve(results?: unknown) {
+          if (!resolved) {
+            resolved = true;
+            return _resolve(results);
+          }
+          logger.error('multiple resolutions. ignoring results:');
+          logger.error(inspect(results, false, Infinity));
         }
-        logger.error('multiple resolutions. ignoring results:');
-        logger.error(inspect(results, false, Infinity));
-      }
 
-      function reject(err: Error) {
-        if (!resolved) {
-          resolved = true;
-          return _reject(err);
+        function reject(err: Error) {
+          if (!resolved) {
+            resolved = true;
+            return _reject(err);
+          }
+          logger.error('multiple resolutions. ignoring error:');
+          logger.error(inspect(err, false, Infinity));
         }
-        logger.error('multiple resolutions. ignoring error:');
-        logger.error(inspect(err, false, Infinity));
-      }
-      // handle case #1 from comment above. set resolve/reject on context object
-      // and Context class actuates them context.done/succeed/fail are called
-      context._resolve = resolve;
-      context._reject = reject;
+        // handle case #1 from comment above. set resolve/reject on context object
+        // and Context class actuates them context.done/succeed/fail are called
+        context._resolve = resolve;
+        context._reject = reject;
 
-      // handle case #2 from above. build callback function that calls resolve/reject
-      // if callback is used by the handler.
-      const handlerCallback = (err?: string | Error | null, res?: unknown) => {
-        if (err) {
-          return reject(err instanceof Error ? err : new Error(err));
+        // handle case #2 from above. build callback function that calls resolve/reject
+        // if callback is used by the handler.
+        const handlerCallback = (
+          err?: string | Error | null,
+          res?: unknown,
+        ) => {
+          if (err) {
+            return reject(err instanceof Error ? err : new Error(err));
+          }
+          resolve(res);
+        };
+
+        // run the handler
+        const voidOrPromise = handler(event, context, handlerCallback);
+
+        // handle case #3 where handler returns a promise. then/catch the promise
+        if (voidOrPromise) {
+          voidOrPromise.then(resolve).catch(reject);
         }
-        resolve(res);
-      };
 
-      // run the handler
-      const voidOrPromise = handler(event, context, handlerCallback);
-
-      // handle case #3 where handler returns a promise. then/catch the promise
-      if (voidOrPromise) {
-        voidOrPromise.then(resolve).catch(reject);
-      }
-
-      // if voidOrPromise is nullish then handler is using callback function or context
-      // object for response. context timeout will watch that function doesn't hang. just
-      // return from promise executor here.
-    });
+        // if voidOrPromise is nullish then handler is using callback function or context
+        // object for response. context timeout will watch that function doesn't hang. just
+        // return from promise executor here.
+      },
+    );
 
     context._finalize();
     context._clearTimeout();
@@ -99,6 +104,8 @@ export async function runHandler({
 
     // something other than an error was thrown from inside the handler function
     logger.error(inspect(err, false, Infinity));
-    return callback(new Error('something other than an error was thrown from the handler'));
+    return callback(
+      new Error('something other than an error was thrown from the handler'),
+    );
   }
 }

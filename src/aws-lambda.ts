@@ -49,7 +49,9 @@ interface APIGatewayEventIdentity {
   userArn: string | null;
 }
 
-export interface APIGatewayEventRequestContextWithAuthorizer<TAuthorizerContext> {
+export interface APIGatewayEventRequestContextWithAuthorizer<
+  TAuthorizerContext,
+> {
   accountId: string;
   apiId: string;
   authorizer: TAuthorizerContext;
@@ -95,7 +97,8 @@ type APIGatewayEventDefaultAuthorizerContext =
       [name: string]: any;
     };
 
-export type APIGatewayProxyEvent = APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
+export type APIGatewayProxyEvent =
+  APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
 
 interface APIGatewayRequestAuthorizerEventHeaders {
   [name: string]: string | undefined;
@@ -136,7 +139,10 @@ export interface APIGatewayRequestAuthorizerEvent {
   requestContext: APIGatewayEventRequestContextWithAuthorizer<undefined>;
 }
 
-export type Callback<TResult = any> = (error?: Error | string | null, result?: TResult) => void;
+export type Callback<TResult = any> = (
+  error?: Error | string | null,
+  result?: TResult,
+) => void;
 
 interface ClientContextClient {
   installationId: string;
@@ -216,12 +222,15 @@ interface MaybeStatementResource {
   NotResource?: string | string[] | undefined;
 }
 
-type StatementAction = { Action: string | string[] } | { NotAction: string | string[] };
+type StatementAction =
+  | { Action: string | string[] }
+  | { NotAction: string | string[] };
 
 type StatementResource = MaybeStatementPrincipal &
   ({ Resource: string | string[] } | { NotResource: string | string[] });
 
-type StatementPrincipal = MaybeStatementResource & ({ Principal: PrincipalValue } | { NotPrincipal: PrincipalValue });
+type StatementPrincipal = MaybeStatementResource &
+  ({ Principal: PrincipalValue } | { NotPrincipal: PrincipalValue });
 
 type StatementEffect = 'Allow' | 'Deny';
 
@@ -237,7 +246,9 @@ interface BaseStatement {
   Condition?: ConditionBlock | undefined;
 }
 
-type Statement = BaseStatement & StatementAction & (StatementResource | StatementPrincipal);
+type Statement = BaseStatement &
+  StatementAction &
+  (StatementResource | StatementPrincipal);
 
 interface PolicyDocument {
   Version: string;
@@ -255,13 +266,13 @@ export interface APIGatewayProxyCognitoAuthorizer {
   };
 }
 
-export type APIGatewayProxyWithCognitoAuthorizerEvent = APIGatewayProxyEventBase<APIGatewayProxyCognitoAuthorizer>;
+export type APIGatewayProxyWithCognitoAuthorizerEvent =
+  APIGatewayProxyEventBase<APIGatewayProxyCognitoAuthorizer>;
 
 export type Handler<TEvent = any, TResult = any> = (
   event: TEvent,
   context: Context,
-  callback: Callback<TResult>
-  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  callback: Callback<TResult>,
 ) => void | Promise<TResult>;
 
 export type APIGatewayProxyWithCognitoAuthorizerHandler = Handler<
@@ -276,9 +287,12 @@ export interface APIGatewayAuthorizerResult {
   usageIdentifierKey?: string | null | undefined;
 }
 
-export type APIGatewayAuthorizerEvent = APIGatewayTokenAuthorizerEvent | APIGatewayRequestAuthorizerEvent;
+export type APIGatewayAuthorizerEvent =
+  | APIGatewayTokenAuthorizerEvent
+  | APIGatewayRequestAuthorizerEvent;
 
-type DefaultApiGatewayEvent = APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
+type DefaultApiGatewayEvent =
+  APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
 
 export type DecodedAuthorizationTokenPermission = {
   permission: string;

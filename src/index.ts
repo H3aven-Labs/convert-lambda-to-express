@@ -1,4 +1,7 @@
-export { EventOptions } from './Event';
 export { ContextOptions } from './Context';
-export { WrapperOptions, wrapLambda } from './wrapLambda';
-export { WrapperOptions as WrapperOptionsWithAuthorizer, wrapLambdaWithAuthorizer } from './wrapLambdaWithAuthorizer';
+export { EventOptions } from './Event';
+export { wrapLambda, WrapperOptions } from './wrapLambda';
+export {
+  wrapLambdaWithAuthorizer,
+  WrapperOptions as WrapperOptionsWithAuthorizer,
+} from './wrapLambdaWithAuthorizer';

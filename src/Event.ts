@@ -9,9 +9,8 @@ import {
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyEventStageVariables,
-  APIGatewayProxyWithCognitoAuthorizerEvent
+  APIGatewayProxyWithCognitoAuthorizerEvent,
 } from './aws-lambda';
-
 import { generateRandomHex } from './utils';
 
 const DEFAULT_RESOURCE_PATH = '/{proxy+}';
@@ -38,7 +37,7 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      timeZone: 'UTC'
+      timeZone: 'UTC',
     });
 
     const formatted = formatter.formatToParts(new Date(startTime));
@@ -52,9 +51,14 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
   }
 
   public static buildRequestMultiValueHeaders(_headers: Request['headers']) {
-    const headers: APIGatewayProxyWithCognitoAuthorizerEvent['multiValueHeaders'] = {};
+    const headers: APIGatewayProxyWithCognitoAuthorizerEvent['multiValueHeaders'] =
+      {};
     for (const [name, value] of Object.entries(_headers)) {
-      headers[name] = Array.isArray(value) ? value : value ? value.split(',') : undefined;
+      headers[name] = Array.isArray(value)
+        ? value
+        : value
+          ? value.split(',')
+          : undefined;
     }
     return headers;
   }
@@ -91,11 +95,14 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
     return flattened;
   }
 
-  public static buildQueryString(_query: APIGatewayProxyEventMultiValueQueryStringParameters | null) {
+  public static buildQueryString(
+    _query: APIGatewayProxyEventMultiValueQueryStringParameters | null,
+  ) {
     if (!_query) {
       return null;
     }
-    const query: APIGatewayProxyWithCognitoAuthorizerEvent['queryStringParameters'] = {};
+    const query: APIGatewayProxyWithCognitoAuthorizerEvent['queryStringParameters'] =
+      {};
     for (const [key, value] of Object.entries(_query)) {
       if (!value) {
         continue;
@@ -126,18 +133,28 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
     const path = req.path;
     const method = req.method;
 
-    this.body = !req.body ? null : typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+    this.body = !req.body
+      ? null
+      : typeof req.body === 'string'
+        ? req.body
+        : JSON.stringify(req.body);
     this.path = path;
     this.httpMethod = method;
-    this.pathParameters = req.params ?? null;
+    this.pathParameters = req.params as APIGatewayProxyEventPathParameters | null;
     this.stageVariables = this.options.stageVariables ?? null;
     this.resource = resourcePath;
     this.isBase64Encoded = this.options.isBase64EncodedReq ?? false;
 
     this.headers = Event.buildRequestHeaders(req.headers ?? {});
-    this.multiValueHeaders = Event.buildRequestMultiValueHeaders(req.headers ?? {});
-    this.multiValueQueryStringParameters = Event.buildMultiValueQueryString(req.query ?? {});
-    this.queryStringParameters = Event.buildQueryString(this.multiValueQueryStringParameters);
+    this.multiValueHeaders = Event.buildRequestMultiValueHeaders(
+      req.headers ?? {},
+    );
+    this.multiValueQueryStringParameters = Event.buildMultiValueQueryString(
+      req.query ?? {},
+    );
+    this.queryStringParameters = Event.buildQueryString(
+      this.multiValueQueryStringParameters,
+    );
 
     const startTime = this.options.startTime;
 
@@ -146,7 +163,7 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
       apiId: 'express',
       protocol: req.protocol ?? 'https',
       httpMethod: method,
-      path: path,
+      path,
       stage: options.stage ?? 'dev',
       requestId: this.options.awsRequestId,
       requestTimeEpoch: startTime,
@@ -155,7 +172,7 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
       resourceId: generateRandomHex(6),
       // TODO: implement
       authorizer: this.options.authorizer || {
-        claims: {}
+        claims: {},
       },
       // TODO: implement
       identity: {
@@ -173,8 +190,8 @@ export class Event implements APIGatewayProxyWithCognitoAuthorizerEvent {
         apiKey: null,
         apiKeyId: null,
         principalOrgId: null,
-        clientCert: null
-      }
+        clientCert: null,
+      },
     };
   }
 }

@@ -1,0 +1,93 @@
+name: Publish new version
+
+on:
+  push:
+    branches:
+      - "main"
+
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Debug mode"
+        required: false
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set RUN_URL Environment Variable
+        run: |
+          echo "RUN_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Enable Corepack and prepare correct Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.2 --activate
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22.19.0
+          # cache: 'yarn'
+
+      - name: Set variables
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.H3_NPM_TOKEN }}" >> .npmrc
+          echo "@h3aven-labs:registry=https://npm.pkg.github.com/" >> .npmrc
+          echo "PACKAGE_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
+
+      - name: Create .yarnrc.yml
+        run: |
+          cat <<EOF > .yarnrc.yml
+          nodeLinker: node-modules
+
+          npmRegistries:
+            "https://npm.pkg.github.com":
+              npmAuthToken: ${{ secrets.H3_NPM_TOKEN }}
+
+          npmScopes:
+            h3aven-labs:
+              npmAlwaysAuth: true
+              npmRegistryServer: "https://npm.pkg.github.com"
+          EOF
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
+      - name: Publish
+        run: |
+          yarn
+          yarn build
+          npm publish
+
+      - name: Generate new Tag
+        run: |
+          git tag v${{ env.PACKAGE_VERSION }} -f
+          git push --tags -f
+
+      - name: Notify Slack on success
+        uses: slackapi/slack-github-action@v2.1.1
+        if: ${{ success() }}
+        with:
+          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            status: "success"
+            text: "✅ h3-tools v${{ env.PACKAGE_VERSION }} published!\nAction Link: ${{ env.RUN_URL }}"
+
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.1.1
+        if: ${{ failure() }}
+        with:
+          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            status: "failure"
+            text: "❌ h3-tools v${{ env.PACKAGE_VERSION }} publish failed!\nAction Link: ${{ env.RUN_URL }}"

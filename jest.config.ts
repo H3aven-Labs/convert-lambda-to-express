@@ -8,9 +8,8 @@ const config = {
   globals: {
     'ts-jest': {
       diagnostics: true,
-      tsconfig: '<rootDir>/tsconfig.test.json'
-    }
-  }
+    },
+  },
 };
 
 export default config;
