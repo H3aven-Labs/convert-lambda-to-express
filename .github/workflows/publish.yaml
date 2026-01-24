@@ -71,23 +71,3 @@ jobs:
         run: |
           git tag v${{ env.PACKAGE_VERSION }} -f
           git push --tags -f
-
-      - name: Notify Slack on success
-        uses: slackapi/slack-github-action@v2.1.1
-        if: ${{ success() }}
-        with:
-          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
-          payload: |
-            status: "success"
-            text: "✅ h3-tools v${{ env.PACKAGE_VERSION }} published!\nAction Link: ${{ env.RUN_URL }}"
-
-      - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v2.1.1
-        if: ${{ failure() }}
-        with:
-          webhook: ${{ secrets.SLACK_VERSION_UPDATES_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
-          payload: |
-            status: "failure"
-            text: "❌ h3-tools v${{ env.PACKAGE_VERSION }} publish failed!\nAction Link: ${{ env.RUN_URL }}"
