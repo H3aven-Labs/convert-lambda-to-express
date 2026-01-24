@@ -1330,7 +1330,7 @@ __metadata:
 
 "@h3aven-labs/h3-eslint@npm:2.0.0":
   version: 2.0.0
-  resolution: "@h3aven-labs/h3-eslint@npm:2.0.0::__archiveUrl=http%3A%2F%2F127.0.0.1%3A4873%2F%40h3aven-labs%2Fh3-eslint%2F-%2Fcdbcd61cdec3957cb3fe00ba4f5eeb8bd02110ec"
+  resolution: "@h3aven-labs/h3-eslint@npm:2.0.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40h3aven-labs%2Fh3-eslint%2F2.0.0%2Fcdbcd61cdec3957cb3fe00ba4f5eeb8bd02110ec"
   dependencies:
     "@eslint/js": "npm:^9.16.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.34.0"
