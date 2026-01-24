@@ -1,6 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyResult } from './aws-lambda';
-import { coerceBody, convertResponseFactory, ConvertResponseOptions, setResponseHeaders } from './convertResponse';
+import {
+  coerceBody,
+  convertResponseFactory,
+  ConvertResponseOptions,
+  setResponseHeaders,
+} from './convertResponse';
 
 class MockResponse {
   header = jest.fn();
@@ -17,64 +21,68 @@ describe('convertResponse()', () => {
     res = new MockResponse();
     logger = {
       info: jest.fn(),
-      error: jest.fn()
+      error: jest.fn(),
     } as any;
   });
   const defaultContentType = 'application/json';
   const options: ConvertResponseOptions = {
     defaultResponseHeaders: {
-      'content-type': defaultContentType
-    }
+      'content-type': defaultContentType,
+    },
   };
   const defaultResponse: APIGatewayProxyResult = {
     statusCode: 200,
-    body: '{"default":"body"}'
+    body: '{"default":"body"}',
   };
   const responseContentType = 'application/xml';
   const responseWithContentType: APIGatewayProxyResult = {
     statusCode: 200,
     body: '',
     headers: {
-      'content-type': responseContentType
-    }
+      'content-type': responseContentType,
+    },
   };
   const multiValueResponseType = ['no-cache', 'no-store', 'must-revalidate'];
   const multiValueResponse: APIGatewayProxyResult = {
     statusCode: 200,
     body: '',
     headers: {
-      'content-type': responseContentType
+      'content-type': responseContentType,
     },
     multiValueHeaders: {
-      'cache-control': multiValueResponseType
-    }
+      'cache-control': multiValueResponseType,
+    },
   };
   describe('setResponseHeaders', () => {
     it('should set default headers correctly', () => {
       setResponseHeaders({
         res: res as any,
         options,
-        response: defaultResponse
+        response: defaultResponse,
       });
       expect(res.header).toHaveBeenCalledWith('content-type', defaultContentType);
     });
     it('should set response headers correctly', () => {
       setResponseHeaders({
         res: res as any,
-        response: responseWithContentType
+        response: responseWithContentType,
       });
       expect(res.header).toHaveBeenCalledWith('content-type', responseContentType);
     });
     it('should set response multi-value headers correctly', () => {
       setResponseHeaders({ res: res as any, response: multiValueResponse });
       expect(res.header).toHaveBeenNthCalledWith(1, 'content-type', responseContentType);
-      expect(res.header).toHaveBeenNthCalledWith(2, 'cache-control', multiValueResponseType.join(', '));
+      expect(res.header).toHaveBeenNthCalledWith(
+        2,
+        'cache-control',
+        multiValueResponseType.join(', '),
+      );
     });
     it('should set default headers first and overwrite with specific headers', () => {
       setResponseHeaders({
         res: res as any,
         options,
-        response: responseWithContentType
+        response: responseWithContentType,
       });
       expect(res.header).toHaveBeenNthCalledWith(1, 'content-type', defaultContentType);
       expect(res.header).toHaveBeenNthCalledWith(2, 'content-type', responseContentType);
@@ -122,7 +130,6 @@ describe('convertResponse()', () => {
       };
       oddObject.toString = 0;
       try {
-        // eslint-disable-next-line no-console
         console.log(`${oddObject}`);
       } catch (err: unknown) {
         const { message, name } = err as Error;
@@ -140,7 +147,7 @@ describe('convertResponse()', () => {
       convertResponse = convertResponseFactory({
         res: res as any,
         logger: logger as any,
-        options
+        options,
       });
     });
 
@@ -164,7 +171,7 @@ describe('convertResponse()', () => {
     it('should set a default statusCode', () => {
       convertResponse(undefined, {
         body: 'hello',
-        statusCode: undefined
+        statusCode: undefined,
       } as any);
       expect(res.status).toBeCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200);
@@ -176,7 +183,7 @@ describe('convertResponse()', () => {
       const errResponse = {
         errorMessage: err.message,
         errorType: err.name,
-        trace: err.stack?.split('\n')
+        trace: err.stack?.split('\n'),
       };
       expect(logger.error).toBeCalledTimes(2);
       expect(logger.error).toHaveBeenNthCalledWith(1, 'End - Error:');

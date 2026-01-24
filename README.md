@@ -66,7 +66,7 @@ app.listen(3000, () => {
 
 ## Hot-Reloading DevServer (useful with cdk)
 
-You can import the `addToDevServer` into your cdk constructs and add the handlers during run time.  This was the designed use case.  See [`matthewkeil/full-stack-pattern`](https://github.com/matthewkeil/full-stack-pattern) for an example. Also works well with sam templates or any other method for programmatically building the handlers array in the example below.  In the cdk instance, instead of calling app.synth() call startDevServer() and it will give you a hot reloading api.   
+You can import the `addToDevServer` into your cdk constructs and add the handlers during run time. This was the designed use case. See [`matthewkeil/full-stack-pattern`](https://github.com/matthewkeil/full-stack-pattern) for an example. Also works well with sam templates or any other method for programmatically building the handlers array in the example below. In the cdk instance, instead of calling app.synth() call startDevServer() and it will give you a hot reloading api.
 
 ```typescript
 import { addToDevServer, startDevServer, HandlerConfig } from 'convert-lambda-to-express';
@@ -136,7 +136,7 @@ export interface WrapperOptions {
   region?: string;
   profile?: string;
   credentialsFilename?: string;
-  logger?: Logger; // winston logger
+  logger?: Logger;
   defaultResponseHeaders?: { [header: string]: string | number | boolean };
 }
 
@@ -161,29 +161,28 @@ export interface DevServerConfig {
 }
 ```
 
-| Key name | Description |
-| --- | --- |
-| `method` | HTTP method to use for the handler|
-| `resourcePath`|defaults to `/{proxy+}` Placed in ENVIRONMENT, `event` and `context`|
-| `handler`|`filename.exportName` format. Placed in ENVIRONMENT|
-| `codeDirectory`|used to import handler and for watching code changes|
-| `environment`|environment variables|
-| `functionName`|optional, defaults to `convert-lambda-to-express`. Placed in ENVIRONMENT, `event` and `context`|
-| `functionVersion`|optional, defaults to `$LATEST`. Placed in ENVIRONMENT|
-| `timeoutInSeconds`|optional, default to `3`. watchdog timer that mimics lambda's timeout|
-| `identity`|optional, CognitoIdentity object, see [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/7b62f878cc218c8e94e6efafa55cea6796b501f7/types/aws-lambda/handler.d.ts#L124). Passed in `context`|
-| `clientContext`|optional, ClientContext object, see [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/7b62f878cc218c8e94e6efafa55cea6796b501f7/types/aws-lambda/handler.d.ts#L129). Passed in `context`|
-| `nodeModulesPath`|optional, path to local node_modules folder. Placed in ENVIRONMENT|
-| `stage`|optional, defaults to `dev`. Passed in `event`|
-| `isBase64Encoded`|optional, default to `false`. Passed in to handler `event`|
-| `finalize`|optional, clean-up function that is called at the end of each request|
-| `accountId`|optional, aws account id. Placed in ENVIRONMENT|
-| `region`|optional, AWS region, default to `us-east-1`. adds AWS_REGION to ENVIRONMENT|
-| `profile`|optional, defaults to `default`. profile from `~/.aws/credential` to use. Adds tokens to AWS_TOKEN, AWS_SECRET_TOKEN, AWS_SESSION_TOKEN|
-| `credentialsFilename`|optional, defaults to `~/.aws/credential`|
-| `logger`|optional, winston Logger object. will default to the console object if not present|
-| `defaultResponseHeaders`|optional, headers that should be applied to all responses|
-
+| Key name                 | Description                                                                                                                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `method`                 | HTTP method to use for the handler                                                                                                                                                                                |
+| `resourcePath`           | defaults to `/{proxy+}` Placed in ENVIRONMENT, `event` and `context`                                                                                                                                              |
+| `handler`                | `filename.exportName` format. Placed in ENVIRONMENT                                                                                                                                                               |
+| `codeDirectory`          | used to import handler and for watching code changes                                                                                                                                                              |
+| `environment`            | environment variables                                                                                                                                                                                             |
+| `functionName`           | optional, defaults to `convert-lambda-to-express`. Placed in ENVIRONMENT, `event` and `context`                                                                                                                   |
+| `functionVersion`        | optional, defaults to `$LATEST`. Placed in ENVIRONMENT                                                                                                                                                            |
+| `timeoutInSeconds`       | optional, default to `3`. watchdog timer that mimics lambda's timeout                                                                                                                                             |
+| `identity`               | optional, CognitoIdentity object, see [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/7b62f878cc218c8e94e6efafa55cea6796b501f7/types/aws-lambda/handler.d.ts#L124). Passed in `context` |
+| `clientContext`          | optional, ClientContext object, see [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/7b62f878cc218c8e94e6efafa55cea6796b501f7/types/aws-lambda/handler.d.ts#L129). Passed in `context`   |
+| `nodeModulesPath`        | optional, path to local node_modules folder. Placed in ENVIRONMENT                                                                                                                                                |
+| `stage`                  | optional, defaults to `dev`. Passed in `event`                                                                                                                                                                    |
+| `isBase64Encoded`        | optional, default to `false`. Passed in to handler `event`                                                                                                                                                        |
+| `finalize`               | optional, clean-up function that is called at the end of each request                                                                                                                                             |
+| `accountId`              | optional, aws account id. Placed in ENVIRONMENT                                                                                                                                                                   |
+| `region`                 | optional, AWS region, default to `us-east-1`. adds AWS_REGION to ENVIRONMENT                                                                                                                                      |
+| `profile`                | optional, defaults to `default`. profile from `~/.aws/credential` to use. Adds tokens to AWS_TOKEN, AWS_SECRET_TOKEN, AWS_SESSION_TOKEN                                                                           |
+| `credentialsFilename`    | optional, defaults to `~/.aws/credential`                                                                                                                                                                         |
+| `logger`                 | optional, Logger object. will default to the console object if not present                                                                                                                                        |
+| `defaultResponseHeaders` | optional, headers that should be applied to all responses                                                                                                                                                         |
 
 ## License
 

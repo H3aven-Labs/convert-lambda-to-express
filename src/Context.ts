@@ -1,8 +1,13 @@
+import { AwsCredentialIdentity } from '@smithy/types';
 import os from 'os';
 import { resolve } from 'path';
-import { Context as IContext, CognitoIdentity, ClientContext } from './aws-lambda';
+
+import {
+  ClientContext,
+  CognitoIdentity,
+  Context as IContext,
+} from './aws-lambda';
 import { generateRandomHex, TimeoutError } from './utils';
-import { AwsCredentialIdentity } from '@smithy/types';
 
 type Resolve = (response: unknown) => void;
 type Reject = (err: Error) => void;
@@ -30,8 +35,20 @@ export interface ContextOptions {
 }
 
 export class Context implements IContext {
-  public static createInvokeFunctionArn(region: string, accountId: string, functionName: string) {
-    return ['arn', 'aws', 'lambda', region, accountId, 'function', functionName].join(':');
+  public static createInvokeFunctionArn(
+    region: string,
+    accountId: string,
+    functionName: string,
+  ) {
+    return [
+      'arn',
+      'aws',
+      'lambda',
+      region,
+      accountId,
+      'function',
+      functionName,
+    ].join(':');
   }
 
   public static getAwsRequestId() {
@@ -45,7 +62,7 @@ export class Context implements IContext {
       generateRandomHex(4),
       generateRandomHex(4),
       generateRandomHex(4),
-      generateRandomHex(12)
+      generateRandomHex(12),
     ].join('-');
   }
 
@@ -74,27 +91,40 @@ export class Context implements IContext {
   constructor(private options: ContextOptions) {
     // setup time management
     this._startTime = options.startTime;
-    this._timeout = options?.timeoutInSeconds ? options.timeoutInSeconds * 1000 : 3000; // default lambda timeout
+    this._timeout = options?.timeoutInSeconds
+      ? options.timeoutInSeconds * 1000
+      : 3000; // default lambda timeout
     this.__timeout = setTimeout(() => {
-      this.fail(new TimeoutError('Task timed out after ' + (this._timeout / 1000).toFixed(0) + ' second(s)'));
+      this.fail(
+        new TimeoutError(
+          'Task timed out after ' +
+            (this._timeout / 1000).toFixed(0) +
+            ' second(s)',
+        ),
+      );
     }, this._timeout);
 
     // setup Context internals
     this._region = this.options.region ?? 'us-east-1';
     this._accountId = this.options.accountId ?? '123456789012';
-    this.__finalize = options.finalize ?? function () {}; // eslint-disable-line @typescript-eslint/no-empty-function
+    this.__finalize = options.finalize ?? function () {};
 
     // setup properties of IContext
     this.callbackWaitsForEmptyEventLoop = false; // not supported by this package
     this.functionName = options.functionName ?? 'convert-lambda-to-express';
     this.functionVersion = options.functionVersion ?? '$LATEST';
     this.memoryLimitInMB = `${options.memorySize ?? 128}`;
-    this.logGroupName = options.logGroupName ?? `/aws/lambda/${this.functionName}`;
+    this.logGroupName =
+      options.logGroupName ?? `/aws/lambda/${this.functionName}`;
     this.logStreamName = options.logStreamName ?? 'aws-log-stream';
     this.identity = options.identity;
     this.clientContext = options.clientContext;
 
-    this.invokedFunctionArn = Context.createInvokeFunctionArn(this._region, this._accountId, this.functionName);
+    this.invokedFunctionArn = Context.createInvokeFunctionArn(
+      this._region,
+      this._accountId,
+      this.functionName,
+    );
     this.awsRequestId = Context.getAwsRequestId();
 
     for (const [key, value] of Object.entries(this._buildExecutionEnv())) {
@@ -191,7 +221,9 @@ export class Context implements IContext {
 
     // base configuration
     env.AWS_LAMBDA_FUNCTION_NAME = this.functionName;
-    env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = Math.floor(os.freemem() / 1048576).toString();
+    env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = Math.floor(
+      os.freemem() / 1048576,
+    ).toString();
     env.AWS_LAMBDA_FUNCTION_VERSION = '$LATEST';
     env.AWS_LAMBDA_INITIALIZATION_TYPE = 'on-demand';
     env.TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -220,7 +252,9 @@ export class Context implements IContext {
     env.PWD = pwd;
     env.LAMBDA_TASK_ROOT = pwd;
     env.LAMBDA_RUNTIME_DIR = process.execPath;
-    env.NODE_PATH = this.options.nodeModulesPath ? this.options.nodeModulesPath : resolve(pwd, 'node_modules');
+    env.NODE_PATH = this.options.nodeModulesPath
+      ? this.options.nodeModulesPath
+      : resolve(pwd, 'node_modules');
     return env;
   }
 }

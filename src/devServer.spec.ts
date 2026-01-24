@@ -1,11 +1,12 @@
 import { resolve } from 'path';
+
 import {
   convertToExpressPath,
   getHandler,
+  loadEnvironment,
+  overwrittenKeys,
   watchCodePath,
   watchPaths,
-  overwrittenKeys,
-  loadEnvironment
 } from './devServer';
 
 describe('devServer', () => {
@@ -77,11 +78,11 @@ describe('devServer', () => {
     });
     const environment1 = {
       TEST_VAR: 'environment1-var1',
-      TEST_VAR2: 'environment1-var2'
+      TEST_VAR2: 'environment1-var2',
     };
     const environment2 = {
       TEST_VAR: 'environment2-var1',
-      TEST_VAR3: 'environment2-var3'
+      TEST_VAR3: 'environment2-var3',
     };
     it('should load environment variables', () => {
       delete process.env.TEST_VAR;
@@ -109,15 +110,20 @@ describe('devServer', () => {
       expect(process.env.TEST_VAR3).toEqual(environment2.TEST_VAR3);
     });
     it('should log env/key pairs in verbose mode', () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       delete process.env.TEST_VAR;
       delete process.env.TEST_VAR2;
       delete process.env.TEST_VAR3;
       loadEnvironment({ environment: environment1, verbose: true });
-      expect(spy).toHaveBeenNthCalledWith(1, 'loading env: key TEST_VAR with value environment1-var1');
-      expect(spy).toHaveBeenNthCalledWith(2, 'loading env: key TEST_VAR2 with value environment1-var2');
+      expect(spy).toHaveBeenNthCalledWith(
+        1,
+        'loading env: key TEST_VAR with value environment1-var1',
+      );
+      expect(spy).toHaveBeenNthCalledWith(
+        2,
+        'loading env: key TEST_VAR2 with value environment1-var2',
+      );
 
       spy.mockClear();
     });
@@ -131,7 +137,7 @@ describe('devServer', () => {
 
     const { exportName, filePath, handlerFunction } = getHandler({
       handler,
-      codeDirectory
+      codeDirectory,
     });
 
     expect(watchPaths.length).toBe(1);

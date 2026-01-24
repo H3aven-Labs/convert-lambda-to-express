@@ -1,6 +1,5 @@
-import { IncomingHttpHeaders } from 'http';
 import { Response } from 'express';
-import { Logger } from 'winston';
+import { IncomingHttpHeaders } from 'http';
 
 type DefaultHeaders = {
   [key in keyof IncomingHttpHeaders]: Parameters<Response['header']>[1];
@@ -10,20 +9,27 @@ export interface ConvertResponseOptions {
 }
 
 function isObject(response: unknown): response is Record<string, unknown> {
-  return typeof response === 'object' && response !== null && !Array.isArray(response) && !Buffer.isBuffer(response);
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    !Array.isArray(response) &&
+    !Buffer.isBuffer(response)
+  );
 }
 
 export function setResponseHeaders({
   res,
   response,
-  options
+  options,
 }: {
   res: Response;
   response?: unknown;
   options?: ConvertResponseOptions;
 }) {
   if (options?.defaultResponseHeaders) {
-    for (const [name, value] of Object.entries(options?.defaultResponseHeaders)) {
+    for (const [name, value] of Object.entries(
+      options?.defaultResponseHeaders,
+    )) {
       res.header(name, value);
     }
   }
@@ -37,14 +43,24 @@ export function setResponseHeaders({
 
     if (isObject(response.multiValueHeaders)) {
       for (const [name, value] of Object.entries(response.multiValueHeaders)) {
-        res.header(name, Array.isArray(value) ? value.map(val => `${val}`).join(', ') : `${value}`);
+        res.header(
+          name,
+          Array.isArray(value)
+            ? value.map(val => `${val}`).join(', ')
+            : `${value}`,
+        );
       }
     }
   }
 }
 
 export function coerceBody(body: unknown): string {
-  if (typeof body === 'string' || typeof body === 'number' || typeof body === 'boolean' || typeof body === 'bigint') {
+  if (
+    typeof body === 'string' ||
+    typeof body === 'number' ||
+    typeof body === 'boolean' ||
+    typeof body === 'bigint'
+  ) {
     return `${body}`;
   }
 
@@ -64,7 +80,7 @@ export function coerceBody(body: unknown): string {
   if (body) {
     // possible function/ArrayBuffer/symbol/etc attempt toString()
     try {
-      return (body as any).toString(); // eslint-disable-line @typescript-eslint/no-explicit-any
+      return (body as any).toString();
     } catch {
       // everything failed
     }
@@ -76,17 +92,17 @@ export function coerceBody(body: unknown): string {
 export function convertResponseFactory({
   res,
   logger,
-  options
+  options,
 }: {
   res: Response;
-  logger: Logger | Console;
+  logger: Console;
   options?: ConvertResponseOptions;
 }) {
   function sendError({ message, name, stack }: Error) {
     const errorOutput = {
       errorMessage: message,
       errorType: name,
-      trace: stack?.split('\n')
+      trace: stack?.split('\n'),
     };
     logger.error('End - Error:');
     logger.error(errorOutput);
@@ -101,14 +117,20 @@ export function convertResponseFactory({
     }
 
     try {
-      const coerced = isObject(response) && 'body' in response ? coerceBody(response.body) : coerceBody(response);
+      const coerced =
+        isObject(response) && 'body' in response
+          ? coerceBody(response.body)
+          : coerceBody(response);
       logger.info('End - Result:');
       logger.info(coerced);
 
-      const statusCode = isObject(response) && !!response.statusCode ? parseInt(`${response.statusCode}`) : 200;
+      const statusCode =
+        isObject(response) && !!response.statusCode
+          ? parseInt(`${response.statusCode}`)
+          : 200;
       return res.status(statusCode).send(coerced);
-    } catch (error) {
-      return sendError(error as Error);
+    } catch (err) {
+      return sendError(err as Error);
     }
   };
 }

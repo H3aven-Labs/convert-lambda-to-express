@@ -1,22 +1,32 @@
-/* eslint-disable no-console */
-import jwt from 'jsonwebtoken';
-import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
-import { Logger } from 'winston';
-import { Handler, NextFunction, Request, Response } from 'express';
 import { fromEnv, fromIni } from '@aws-sdk/credential-providers';
-import { Context, ContextOptions } from './Context';
-import { Event, EventOptions } from './Event';
-import { convertResponseFactory, ConvertResponseOptions } from './convertResponse';
-import { runHandler } from './runHandler';
 import { AwsCredentialIdentity } from '@smithy/types';
+import { Handler, NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+
+import { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
+import { Context, ContextOptions } from './Context';
+import {
+  convertResponseFactory,
+  ConvertResponseOptions,
+} from './convertResponse';
+import { Event, EventOptions } from './Event';
+import { runHandler } from './runHandler';
 
 export interface WrapperOptions
-  extends Omit<ContextOptions, 'startTime' | 'credentials'>,
-    Pick<EventOptions, 'isBase64EncodedReq' | 'resourcePath' | 'stage' | 'stageVariables' | 'authorizer'>,
+  extends
+    Omit<ContextOptions, 'startTime' | 'credentials'>,
+    Pick<
+      EventOptions,
+      | 'isBase64EncodedReq'
+      | 'resourcePath'
+      | 'stage'
+      | 'stageVariables'
+      | 'authorizer'
+    >,
     ConvertResponseOptions {
   credentialsFilename?: string;
   profile?: string;
-  logger?: Logger;
+  logger?: Console;
   jwtSecret?: string;
 }
 
@@ -29,18 +39,24 @@ function generatePolicy(principalId: string, effect: string, resource: string) {
         {
           Action: 'execute-api:Invoke',
           Effect: effect,
-          Resource: resource
-        }
-      ]
+          Resource: resource,
+        },
+      ],
     },
     context: {
-      userId: principalId
-    }
+      userId: principalId,
+    },
   };
 }
 
-function authorizerMiddleware(req: Request<any>, res: Response, next: NextFunction, jwtSecret: string) {
-  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+function authorizerMiddleware(
+  req: Request<any>,
+  res: Response,
+  next: NextFunction,
+  jwtSecret: string,
+) {
+  const authHeader =
+    req.headers['authorization'] || req.headers['Authorization'];
 
   if (!authHeader) {
     throw new Error('Missing Authorization header');
@@ -63,21 +79,24 @@ function authorizerMiddleware(req: Request<any>, res: Response, next: NextFuncti
 
     (req as any)['user'] = {
       userId: decodedToken['sub'],
-      context: policy.context
+      context: policy.context,
     };
     next();
-  } catch (error) {
-    console.error('Token validation error:', error);
+  } catch (err) {
+    console.error('Token validation error:', err);
     throw new Error('Invalid or expired token');
   }
 }
 
-export async function getCredentials(filename?: string, profile?: string): Promise<AwsCredentialIdentity | undefined> {
+export async function getCredentials(
+  filename?: string,
+  profile?: string,
+): Promise<AwsCredentialIdentity | undefined> {
   try {
     if (filename) {
       const fileCredentialsProvider = fromIni({
         profile,
-        filepath: filename
+        filepath: filename,
       });
       const fileCredentials = await fileCredentialsProvider();
 
@@ -86,25 +105,31 @@ export async function getCredentials(filename?: string, profile?: string): Promi
       }
     }
 
-    if (process.env.AWS_ACCESS_KEY_ID?.length && process.env.AWS_SECRET_ACCESS_KEY?.length) {
+    if (
+      process.env.AWS_ACCESS_KEY_ID?.length &&
+      process.env.AWS_SECRET_ACCESS_KEY?.length
+    ) {
       const envCredentialsProvider = fromEnv();
       const envCredentials = await envCredentialsProvider();
 
       return envCredentials;
     }
-  } catch (e) {
+  } catch {
     return undefined;
   }
 }
 
 export function wrapLambdaWithAuthorizer(
   handler: APIGatewayProxyWithCognitoAuthorizerHandler,
-  options: WrapperOptions = {}
+  options: WrapperOptions = {},
 ): Handler {
   const logger = options.logger ?? console;
 
   return async (req, res, next) => {
-    const credentials = await getCredentials(options.credentialsFilename ?? '~/.aws/credentials', options.profile);
+    const credentials = await getCredentials(
+      options.credentialsFilename ?? '~/.aws/credentials',
+      options.profile,
+    );
 
     try {
       if (!options.jwtSecret) {
@@ -112,21 +137,21 @@ export function wrapLambdaWithAuthorizer(
       }
       try {
         authorizerMiddleware(req, res, next, options.jwtSecret as string);
-      } catch (err) {
+      } catch {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       const startTime = Date.now();
       const context = new Context({
         ...options,
         startTime,
-        credentials
+        credentials,
       });
       const event = new Event({
         ...options,
         req,
         startTime,
         awsRequestId: context.awsRequestId,
-        accountId: context._accountId
+        accountId: context._accountId,
       });
       const convertResponse = convertResponseFactory({ res, logger, options });
       await runHandler({
@@ -134,7 +159,7 @@ export function wrapLambdaWithAuthorizer(
         handler,
         event,
         context,
-        callback: convertResponse
+        callback: convertResponse,
       });
     } catch (err) {
       // if server error building Event, Context or convertResponse

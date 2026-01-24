@@ -1,13 +1,13 @@
-/* eslint-disable no-console */
 // import { watch } from 'fs';
-import { resolve } from 'path';
-import { createServer } from 'http';
 import { watch } from 'chokidar';
-import type { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
-import morgan from 'morgan';
-import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';
 import express, { Handler } from 'express';
+import helmet from 'helmet';
+import { createServer } from 'http';
+import morgan from 'morgan';
+import { resolve } from 'path';
+
+import type { APIGatewayProxyWithCognitoAuthorizerHandler } from './aws-lambda';
 import { HttpMethod } from './utils';
 import { wrapLambda, WrapperOptions } from './wrapLambda';
 
@@ -40,7 +40,8 @@ export interface DevServerConfig {
 if (!globalThis.CLTE_HANDLER_DEFINITIONS) {
   globalThis.CLTE_HANDLER_DEFINITIONS = [];
 }
-export const handlerDefinitions: HandlerConfig[] = globalThis.CLTE_HANDLER_DEFINITIONS;
+export const handlerDefinitions: HandlerConfig[] =
+  globalThis.CLTE_HANDLER_DEFINITIONS;
 
 export const watchPaths: string[] = [];
 export function watchCodePath(path: string) {
@@ -74,7 +75,13 @@ export function addToDevServer(config: HandlerConfig) {
 
 export const overwrittenKeys = new Set<string>();
 const outputKeys = new Set<string>();
-export function loadEnvironment({ verbose, environment }: { verbose?: boolean; environment?: HandlerEnvironment }) {
+export function loadEnvironment({
+  verbose,
+  environment,
+}: {
+  verbose?: boolean;
+  environment?: HandlerEnvironment;
+}) {
   if (!environment) {
     return;
   }
@@ -109,14 +116,16 @@ export function getHandler({ codeDirectory, handler }: GetHandlerConfig) {
   const filePath = resolve(codeDirectory, ...handlerPathSegments, filename);
   const resolved = require.resolve(filePath);
   if (require.cache[resolved]) {
-    delete require.cache[resolved]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
+    delete require.cache[resolved];
   }
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    handlerFunction: require(resolved)[exportName] as APIGatewayProxyWithCognitoAuthorizerHandler,
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    handlerFunction: require(resolved)[
+      exportName
+    ] as APIGatewayProxyWithCognitoAuthorizerHandler,
     filePath: resolved,
-    exportName
+    exportName,
   };
 }
 
@@ -134,18 +143,18 @@ function buildDevServer({
   helmetOptions,
   middleware,
   codeDirectory: globalCodeDirectory,
-  environment: serverEnvironment = {}
+  environment: serverEnvironment = {},
 }: DevServerConfig = {}) {
   const devServer = express();
-  devServer.use(morgan(morganSetting ?? prod ? 'combined' : 'dev'));
+  devServer.use(morgan((morganSetting ?? prod) ? 'combined' : 'dev'));
   devServer.use(
     cors(
       corsOptions ?? {
         origin: '*',
         methods: '*',
-        allowedHeaders: '*'
-      }
-    )
+        allowedHeaders: '*',
+      },
+    ),
   );
   devServer.use(helmet(helmetOptions));
 
@@ -156,7 +165,10 @@ function buildDevServer({
   }
 
   for (const handlerConfig of handlerDefinitions) {
-    handlerConfig.environment = { ...serverEnvironment, ...(handlerConfig.environment ?? {}) };
+    handlerConfig.environment = {
+      ...serverEnvironment,
+      ...(handlerConfig.environment ?? {}),
+    };
     const { environment, method, resourcePath, handler } = handlerConfig;
     const path = convertToExpressPath(resourcePath);
     const _method = method.toLowerCase() as Lowercase<HttpMethod>;
@@ -176,11 +188,13 @@ function buildDevServer({
     }
     const { exportName, filePath, handlerFunction } = getHandler({
       codeDirectory,
-      handler
+      handler,
     });
     if (!showedJsWarning && filePath.endsWith('.js')) {
       showedJsWarning = true;
-      console.warn('using .js files with the dev server is not recommended. us/watch the .ts source files instead');
+      console.warn(
+        'using .js files with the dev server is not recommended. us/watch the .ts source files instead',
+      );
     }
     const wrappedHandler = wrapLambda(handlerFunction, handlerConfig);
     devServer[_method](path, wrappedHandler);
@@ -190,7 +204,7 @@ function buildDevServer({
         method: _method,
         path,
         exportName,
-        filePath
+        filePath,
       });
     }
   }
@@ -239,7 +253,9 @@ export function startDevServer(config: DevServerConfig = {}) {
       if (config.verbose) {
         console.log(`listening on port: ${port}`);
       } else {
-        console.log(`loaded ${handlerDefinitions.length} handlers on port: ${port}`);
+        console.log(
+          `loaded ${handlerDefinitions.length} handlers on port: ${port}`,
+        );
       }
     });
 
@@ -262,9 +278,10 @@ export function startDevServer(config: DevServerConfig = {}) {
   if (hotReload) {
     if (config.verbose) {
       console.log(
-        `>>>\n>>> watching code paths\n>\n${(watchPaths.length ? watchPaths : ['none']).map(
-          path => `> ${path}`
-        )}\n>\n>>>`
+        `>>>\n>>> watching code paths\n>\n${(watchPaths.length
+          ? watchPaths
+          : ['none']
+        ).map(path => `> ${path}`)}\n>\n>>>`,
       );
     }
     for (const path of watchPaths) {
@@ -286,7 +303,10 @@ export function startDevServer(config: DevServerConfig = {}) {
         if (config.verbose) {
           console.log(`>>> file changed: ${filePath}`);
         }
-        debounce = setTimeout(timeoutHandler, typeof hotReload === 'number' ? hotReload : 1000);
+        debounce = setTimeout(
+          timeoutHandler,
+          typeof hotReload === 'number' ? hotReload : 1000,
+        );
         restart();
       });
     }

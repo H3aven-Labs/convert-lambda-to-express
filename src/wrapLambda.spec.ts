@@ -1,4 +1,5 @@
 import { resolve } from 'path';
+
 import { getCredentials } from './wrapLambda';
 
 const testCredentialsFile = resolve(__dirname, '..', 'test', 'credentials');
