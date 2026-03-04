@@ -35,8 +35,6 @@ export async function runHandler({
   try {
     const response = await new Promise<unknown | undefined>(
       (_resolve, _reject) => {
-        logger.info(`START RequestId: ${context.awsRequestId}`);
-
         // only allow one resolution. which ever is first (callback, context.done,
         // promise) wins and the other(s) is ignored
         let resolved = false;

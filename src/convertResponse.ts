@@ -121,8 +121,6 @@ export function convertResponseFactory({
         isObject(response) && 'body' in response
           ? coerceBody(response.body)
           : coerceBody(response);
-      logger.info('End - Result:');
-      logger.info(coerced);
 
       const statusCode =
         isObject(response) && !!response.statusCode
