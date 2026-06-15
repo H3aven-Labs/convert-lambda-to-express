@@ -89,6 +89,10 @@ export class Context implements IContext {
   public _reject?: Reject;
 
   constructor(private options: ContextOptions) {
+    // middy v7 reads context.getRemainingTimeInMillis into a bare variable and
+    // calls it unbound; bind it so `this` survives, matching real AWS Lambda.
+    this.getRemainingTimeInMillis = this.getRemainingTimeInMillis.bind(this);
+
     // setup time management
     this._startTime = options.startTime;
     this._timeout = options?.timeoutInSeconds
